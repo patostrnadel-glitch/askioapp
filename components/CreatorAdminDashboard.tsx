@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AvatarPlaceholder } from "./AvatarPlaceholder";
 import { SectionCard } from "./SectionCard";
@@ -17,6 +17,7 @@ export type CreatorAdminRecord = {
   slug: string;
   bio: string | null;
   price_cents: number;
+  avatar_url: string | null;
 };
 
 type CreatorAdminDashboardProps = {
@@ -192,6 +193,9 @@ type PersonalSettingsProps = {
   requestedSlug: string;
 };
 
+const AVATAR_BUCKET = "creator-avatars";
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+
 function PersonalSettings({
   initialCreator,
   initialErrorMessage,
@@ -204,9 +208,12 @@ function PersonalSettings({
   const [bio, setBio] = useState(
     initialCreator?.bio ?? "Pomaham ludom s fitness, treningom a stravou."
   );
+  const [avatarUrl, setAvatarUrl] = useState(initialCreator?.avatar_url ?? "");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(initialErrorMessage);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const normalizedSlug =
     slug
@@ -334,6 +341,108 @@ function PersonalSettings({
     }
   };
 
+  const handleAvatarButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!selectedFile) {
+      return;
+    }
+
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    if (!creatorId) {
+      setErrorMessage("Profil sa najprv musi vytvorit, az potom vies nahrat fotku.");
+      return;
+    }
+
+    if (!selectedFile.type.startsWith("image/")) {
+      setErrorMessage("Nahraj prosim obrazok vo formate JPG, PNG, WEBP alebo GIF.");
+      return;
+    }
+
+    if (selectedFile.size > MAX_AVATAR_SIZE_BYTES) {
+      setErrorMessage("Profilova fotka moze mat maximalne 5 MB.");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const supabase = getSupabaseClient();
+      const fileExtension = selectedFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = /^[a-z0-9]+$/.test(fileExtension) ? fileExtension : "jpg";
+      const filePath = `${creatorId}/${Date.now()}-${normalizedSlug}.${safeExtension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(AVATAR_BUCKET)
+        .upload(filePath, selectedFile, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        const uploadMessage = uploadError.message.toLowerCase();
+
+        if (uploadMessage.includes("bucket") || uploadMessage.includes("not found")) {
+          setErrorMessage(
+            `V Supabase chyba storage bucket "${AVATAR_BUCKET}". Najprv ho treba vytvorit.`
+          );
+          return;
+        }
+
+        if (
+          uploadError.message.toLowerCase().includes("row-level security") ||
+          uploadError.message.toLowerCase().includes("permission")
+        ) {
+          setErrorMessage(
+            "Supabase blokuje upload fotky. Treba doplnit storage policies pre avatar bucket."
+          );
+          return;
+        }
+
+        throw uploadError;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from("creators")
+        .update({ avatar_url: publicUrl })
+        .eq("id", creatorId);
+
+      if (updateError) {
+        if (
+          updateError.code === "42501" ||
+          updateError.message.toLowerCase().includes("row-level security")
+        ) {
+          setErrorMessage(
+            "Fotka sa nahrala, ale databaza blokuje ulozenie avatar_url. Treba doplnit UPDATE policy pre creators."
+          );
+          return;
+        }
+
+        throw updateError;
+      }
+
+      setAvatarUrl(publicUrl);
+      setSuccessMessage("Profilova fotka bola uspesne nahrata.");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Nepodarilo sa nahrat profilovu fotku. Skus to znova.");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   return (
     <SectionCard className="stack-lg">
       <form className="stack-lg" onSubmit={handleSave}>
@@ -434,15 +543,28 @@ function PersonalSettings({
         </label>
 
         <div className="profile-photo-row">
-          <AvatarPlaceholder label={initials || "MN"} />
+          <AvatarPlaceholder imageUrl={avatarUrl} label={initials || "MN"} />
           <div className="stack-xs">
             <strong>Profilova fotka</strong>
             <p className="muted-text">
-              Placeholder pre buduci upload a upravu profilovej fotografie.
+              Nahraj JPG, PNG, WEBP alebo GIF do velkosti 5 MB.
             </p>
           </div>
-          <button className="secondary-button" type="button">
-            Zmenit fotku
+          <input
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            className="profile-photo-input"
+            disabled={isUploadingAvatar || isSaving}
+            onChange={handleAvatarChange}
+            ref={fileInputRef}
+            type="file"
+          />
+          <button
+            className="secondary-button"
+            disabled={isUploadingAvatar || isSaving}
+            onClick={handleAvatarButtonClick}
+            type="button"
+          >
+            {isUploadingAvatar ? "Nahravam..." : "Zmenit fotku"}
           </button>
         </div>
 

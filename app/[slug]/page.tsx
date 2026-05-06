@@ -17,7 +17,7 @@ export default async function CreatorProfilePage({
   const supabase = getSupabaseClient();
   const { data: creator, error } = await supabase
     .from("creators")
-    .select("full_name, bio, slug, price_cents")
+    .select("full_name, bio, slug, price_cents, avatar_url")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -45,7 +45,11 @@ export default async function CreatorProfilePage({
       <Container className="profile-layout creator-page-shell">
         <SectionCard className="public-profile-card public-profile-hero">
           <div className="stack-md centered public-profile-content">
-            <AvatarPlaceholder label={initials || "TV"} size="lg" />
+            <AvatarPlaceholder
+              imageUrl={creator.avatar_url}
+              label={initials || "TV"}
+              size="lg"
+            />
             <div className="stack-sm centered creator-identity-block">
               <h1 className="creator-profile-title">{creator.full_name}</h1>
               <p className="lead compact creator-profile-bio">{creator.bio}</p>

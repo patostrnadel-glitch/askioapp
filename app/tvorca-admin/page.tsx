@@ -17,7 +17,7 @@ export default async function CreatorAdminPage({
   const supabase = getSupabaseClient();
   const { data: creator, error } = await supabase
     .from("creators")
-    .select("id, full_name, email, slug, bio, price_cents")
+    .select("id, full_name, email, slug, bio, price_cents, avatar_url")
     .eq("slug", requestedSlug)
     .maybeSingle();
 
