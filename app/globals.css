@@ -28,7 +28,7 @@ body {
   min-width: 320px;
   background:
     radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 28%),
-    linear-gradient(180deg, #fcfcfe 0%, var(--background) 100%);
+    linear-gradient(180deg, #fcfcfe 0%, #f7f0ff 52%, #f2dcff 100%);
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
