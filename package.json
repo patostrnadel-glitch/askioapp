@@ -1,0 +1,33 @@
+{
+  "name": "askio",
+  "version": "1.0.0",
+  "description": "MVP UI zaklad pre Askly v Next.js",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patostrnadel-glitch/askio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/patostrnadel-glitch/askio/issues"
+  },
+  "homepage": "https://github.com/patostrnadel-glitch/askio#readme",
+  "dependencies": {
+    "next": "^15.5.6",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  }
+}
