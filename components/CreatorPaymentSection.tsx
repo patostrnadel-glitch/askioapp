@@ -19,12 +19,31 @@ const stripePromise = stripePublishableKey
   : null;
 
 type ExpressCheckoutAvailability = "checking" | "available" | "unavailable";
+type PaymentSurface = "express" | "card" | "both";
 
 export function CreatorPaymentSection() {
+  const [isOpen, setIsOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoadingClientSecret, setIsLoadingClientSecret] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || clientSecret) {
+      return;
+    }
+
     let isActive = true;
 
     const createPaymentIntent = async () => {
@@ -32,6 +51,9 @@ export function CreatorPaymentSection() {
         setErrorMessage("Stripe platba momentalne nie je dostupna.");
         return;
       }
+
+      setIsLoadingClientSecret(true);
+      setErrorMessage("");
 
       try {
         const response = await fetch("/api/stripe/create-payment-intent", {
@@ -58,6 +80,10 @@ export function CreatorPaymentSection() {
         if (isActive) {
           setErrorMessage("Nepodarilo sa pripravit Stripe platbu. Skus to znova.");
         }
+      } finally {
+        if (isActive) {
+          setIsLoadingClientSecret(false);
+        }
       }
     };
 
@@ -66,7 +92,7 @@ export function CreatorPaymentSection() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [clientSecret, isOpen]);
 
   const elementsOptions = useMemo(
     () => ({
@@ -84,22 +110,69 @@ export function CreatorPaymentSection() {
     [clientSecret]
   );
 
-  if (errorMessage) {
-    return <p className="feedback-message feedback-error">{errorMessage}</p>;
-  }
-
-  if (!clientSecret || !stripePromise) {
-    return (
-      <div className="creator-payment-loading">
-        <p className="muted-text">Pripravujem bezpecnu Stripe platbu...</p>
-      </div>
-    );
-  }
-
   return (
-    <Elements options={elementsOptions} stripe={stripePromise}>
-      <CreatorPaymentForm clientSecret={clientSecret} />
-    </Elements>
+    <>
+      <button
+        className="primary-button creator-cta"
+        onClick={() => setIsOpen(true)}
+        type="button"
+      >
+        Opytat sa otazku
+      </button>
+
+      {isOpen ? (
+        <div
+          aria-hidden="true"
+          className="creator-payment-modal-backdrop"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            aria-labelledby="creator-payment-title"
+            aria-modal="true"
+            className="creator-payment-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className="creator-payment-modal-handle" />
+
+            <div className="creator-payment-modal-header">
+              <div className="stack-xs">
+                <h2 className="creator-payment-title" id="creator-payment-title">
+                  Opytat sa otazku
+                </h2>
+                <p className="creator-payment-price">Rychla odpoved • 4,90 €</p>
+                <p className="creator-payment-copy">
+                  Po platbe sa otvori moznost poslat otazku.
+                </p>
+              </div>
+
+              <button
+                aria-label="Zavriet modal"
+                className="creator-payment-close"
+                onClick={() => setIsOpen(false)}
+                type="button"
+              >
+                Zavriet
+              </button>
+            </div>
+
+            {errorMessage ? (
+              <p className="feedback-message feedback-error">{errorMessage}</p>
+            ) : null}
+
+            {!stripePromise || isLoadingClientSecret || !clientSecret ? (
+              <div className="creator-payment-loading">
+                <p className="muted-text">Pripravujem bezpecnu Stripe platbu...</p>
+              </div>
+            ) : (
+              <Elements options={elementsOptions} stripe={stripePromise}>
+                <CreatorPaymentForm clientSecret={clientSecret} />
+              </Elements>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -116,6 +189,31 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
   const [isExpressSubmitting, setIsExpressSubmitting] = useState(false);
   const [expressCheckoutAvailability, setExpressCheckoutAvailability] =
     useState<ExpressCheckoutAvailability>("checking");
+
+  const paymentSurface = useMemo<PaymentSurface>(() => {
+    if (typeof navigator === "undefined") {
+      return "both";
+    }
+
+    const userAgent = navigator.userAgent;
+    const isIPhoneSafari =
+      /iPhone|iPad|iPod/i.test(userAgent) &&
+      /Safari/i.test(userAgent) &&
+      !/CriOS|FxiOS|EdgiOS/i.test(userAgent);
+    const isAndroidChrome =
+      /Android/i.test(userAgent) && /Chrome/i.test(userAgent);
+    const isDesktopDevice = !/Android|iPhone|iPad|iPod|Mobile/i.test(userAgent);
+
+    if (isIPhoneSafari || isAndroidChrome) {
+      return "express";
+    }
+
+    if (isDesktopDevice) {
+      return "card";
+    }
+
+    return "both";
+  }, []);
 
   const confirmPayment = async () => {
     if (!stripe || !elements) {
@@ -179,54 +277,59 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
 
   return (
     <div className="creator-payment-shell">
-      <div className="creator-payment-panel">
-        <div
-          className={
-            expressCheckoutAvailability === "unavailable"
-              ? "creator-express-checkout creator-express-checkout-hidden"
-              : "creator-express-checkout"
-          }
-        >
-          <ExpressCheckoutElement
-            onConfirm={handleExpressConfirm}
-            onLoadError={() => setExpressCheckoutAvailability("unavailable")}
-            onReady={(event) => {
-              const availablePaymentMethods = event.availablePaymentMethods
-                ? Object.keys(event.availablePaymentMethods).length
-                : 0;
-
-              setExpressCheckoutAvailability(
-                availablePaymentMethods > 0 ? "available" : "unavailable"
-              );
-            }}
-            options={{
-              paymentMethodOrder: ["apple_pay", "google_pay"],
-            }}
-          />
-        </div>
-
-        {expressCheckoutAvailability === "unavailable" ? (
-          <p className="creator-payment-availability">
-            Apple Pay / Google Pay nie je na tomto zariadeni dostupne.
-          </p>
-        ) : null}
-      </div>
-
-      <form className="creator-payment-form" onSubmit={handleCardSubmit}>
+      {paymentSurface !== "card" ? (
         <div className="creator-payment-panel">
-          <PaymentElement />
-        </div>
+          <div
+            className={
+              expressCheckoutAvailability === "unavailable"
+                ? "creator-express-checkout creator-express-checkout-hidden"
+                : "creator-express-checkout"
+            }
+          >
+            <ExpressCheckoutElement
+              onConfirm={handleExpressConfirm}
+              onLoadError={() => setExpressCheckoutAvailability("unavailable")}
+              onReady={(event) => {
+                const availablePaymentMethods = event.availablePaymentMethods
+                  ? Object.keys(event.availablePaymentMethods).length
+                  : 0;
 
-        <button
-          className="primary-button creator-cta"
-          disabled={
-            !stripe || !elements || isCardSubmitting || isExpressSubmitting
-          }
-          type="submit"
-        >
-          {isCardSubmitting ? "Spracovavam platbu..." : "Zaplatit kartou"}
-        </button>
-      </form>
+                setExpressCheckoutAvailability(
+                  availablePaymentMethods > 0 ? "available" : "unavailable"
+                );
+              }}
+              options={{
+                paymentMethodOrder: ["apple_pay", "google_pay"],
+              }}
+            />
+          </div>
+
+          {expressCheckoutAvailability === "unavailable" ? (
+            <p className="creator-payment-availability">
+              Apple Pay / Google Pay nie je na tomto zariadeni dostupne.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {paymentSurface !== "express" ||
+      expressCheckoutAvailability === "unavailable" ? (
+        <form className="creator-payment-form" onSubmit={handleCardSubmit}>
+          <div className="creator-payment-panel">
+            <PaymentElement />
+          </div>
+
+          <button
+            className="primary-button creator-cta"
+            disabled={
+              !stripe || !elements || isCardSubmitting || isExpressSubmitting
+            }
+            type="submit"
+          >
+            {isCardSubmitting ? "Spracovavam platbu..." : "Zaplatit kartou"}
+          </button>
+        </form>
+      ) : null}
 
       {errorMessage ? (
         <p className="feedback-message feedback-error">{errorMessage}</p>
