@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AvatarPlaceholder } from "@/components/AvatarPlaceholder";
 import { Container } from "@/components/Container";
 import { SectionCard } from "@/components/SectionCard";
+import { StripeCheckoutButton } from "@/components/StripeCheckoutButton";
 import { getSupabaseClient } from "@/src/lib/supabase";
 
 type CreatorProfilePageProps = {
@@ -58,9 +59,7 @@ export default async function CreatorProfilePage({
               Odpoveď do 24 hodín za {formattedPrice}
             </div>
             <div className="creator-action-stack">
-              <button className="primary-button creator-cta" type="button">
-                Opýtať sa otázku
-              </button>
+              <StripeCheckoutButton slug={creator.slug} />
               <p className="creator-cta-note">
                 Po úspešnej platbe bude creator upozornený aby Vám odpísal čo
                 najskôr na vašu otázku
