@@ -66,21 +66,6 @@ export default async function CreatorProfilePage({
           </div>
         </SectionCard>
 
-        <SectionCard className="stack-md creator-details-card">
-          <div className="stack-xs">
-            <p className="eyebrow">S cim ti mozem pomoct</p>
-            <h2>Temy, ktore na profile odkomunikujes jasne a rychlo</h2>
-          </div>
-          <div className="chips">
-            <span className="chip">Treningovy plan</span>
-            <span className="chip">Strava a navyky</span>
-            <span className="chip">Motivacia a rutina</span>
-          </div>
-          <p className="muted-text">
-            Vyber si temu a pokracuj do dalsieho kroku bez zmeny aktualnej
-            funkcionality profilu.
-          </p>
-        </SectionCard>
       </Container>
     </main>
   );
