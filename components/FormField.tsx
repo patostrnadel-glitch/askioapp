@@ -6,6 +6,11 @@ type FormFieldProps = {
   type?: "text" | "number";
   helperText?: string;
   defaultValue?: string;
+  disabled?: boolean;
+  autoComplete?: string;
+  inputMode?: "text" | "numeric" | "decimal";
+  min?: number;
+  step?: number | "any";
 };
 
 export function FormField({
@@ -16,6 +21,11 @@ export function FormField({
   type = "text",
   helperText,
   defaultValue,
+  disabled = false,
+  autoComplete,
+  inputMode,
+  min,
+  step,
 }: FormFieldProps) {
   return (
     <label className="field">
@@ -24,6 +34,7 @@ export function FormField({
         <textarea
           className="field-input field-textarea"
           defaultValue={defaultValue}
+          disabled={disabled}
           name={name}
           placeholder={placeholder}
           rows={5}
@@ -32,8 +43,13 @@ export function FormField({
         <input
           className="field-input"
           defaultValue={defaultValue}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
+          min={min}
           name={name}
           placeholder={placeholder}
+          step={step}
           type={type}
         />
       )}

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/patostrnadel-glitch/askio#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.3",
     "next": "^15.5.6",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
