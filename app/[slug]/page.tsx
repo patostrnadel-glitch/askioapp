@@ -35,7 +35,10 @@ export default async function CreatorProfilePage({
     .slice(0, 2)
     .map((part: string) => part[0]?.toUpperCase() ?? "")
     .join("");
-  const priceInEuros = creator.price_cents / 100;
+  const formattedPrice = new Intl.NumberFormat("sk-SK", {
+    style: "currency",
+    currency: "EUR",
+  }).format(creator.price_cents / 100);
 
   return (
     <main className="page">
@@ -48,7 +51,7 @@ export default async function CreatorProfilePage({
               <p className="lead compact creator-profile-bio">{creator.bio}</p>
             </div>
             <div className="price-callout">
-              Odpoved za {priceInEuros.toFixed(2)} EUR
+              Odpoveď do 24 hodín za {formattedPrice}
             </div>
             <div className="creator-action-stack">
               <button className="primary-button creator-cta" type="button">
