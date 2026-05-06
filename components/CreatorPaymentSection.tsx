@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import {
   Elements,
   ExpressCheckoutElement,
@@ -23,9 +24,14 @@ type PaymentSurface = "express" | "card" | "both";
 
 export function CreatorPaymentSection() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoadingClientSecret, setIsLoadingClientSecret] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -120,58 +126,70 @@ export function CreatorPaymentSection() {
         Opytat sa otazku
       </button>
 
-      {isOpen ? (
-        <div
-          aria-hidden="true"
-          className="creator-payment-modal-backdrop"
-          onClick={() => setIsOpen(false)}
-        >
-          <div
-            aria-labelledby="creator-payment-title"
-            aria-modal="true"
-            className="creator-payment-modal"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-          >
-            <div className="creator-payment-modal-handle" />
-
-            <div className="creator-payment-modal-header">
-              <div className="stack-xs">
-                <h2 className="creator-payment-title" id="creator-payment-title">
-                  Opytat sa otazku
-                </h2>
-                <p className="creator-payment-price">Rychla odpoved • 4,90 €</p>
-                <p className="creator-payment-copy">
-                  Po platbe sa otvori moznost poslat otazku.
-                </p>
-              </div>
-
-              <button
-                aria-label="Zavriet modal"
-                className="creator-payment-close"
-                onClick={() => setIsOpen(false)}
-                type="button"
+      {isMounted && isOpen
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="creator-payment-modal-backdrop"
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                aria-labelledby="creator-payment-title"
+                aria-modal="true"
+                className="creator-payment-modal"
+                onClick={(event) => event.stopPropagation()}
+                role="dialog"
               >
-                X
-              </button>
-            </div>
+                <div className="creator-payment-modal-handle" />
 
-            {errorMessage ? (
-              <p className="feedback-message feedback-error">{errorMessage}</p>
-            ) : null}
+                <div className="creator-payment-modal-header">
+                  <div className="stack-xs">
+                    <h2
+                      className="creator-payment-title"
+                      id="creator-payment-title"
+                    >
+                      Opytat sa otazku
+                    </h2>
+                    <p className="creator-payment-price">
+                      Rychla odpoved • 4,90 €
+                    </p>
+                    <p className="creator-payment-copy">
+                      Po platbe sa otvori moznost poslat otazku.
+                    </p>
+                  </div>
 
-            {!stripePromise || isLoadingClientSecret || !clientSecret ? (
-              <div className="creator-payment-loading">
-                <p className="muted-text">Pripravujem bezpecnu Stripe platbu...</p>
+                  <button
+                    aria-label="Zavriet modal"
+                    className="creator-payment-close"
+                    onClick={() => setIsOpen(false)}
+                    type="button"
+                  >
+                    X
+                  </button>
+                </div>
+
+                {errorMessage ? (
+                  <p className="feedback-message feedback-error">
+                    {errorMessage}
+                  </p>
+                ) : null}
+
+                {!stripePromise || isLoadingClientSecret || !clientSecret ? (
+                  <div className="creator-payment-loading">
+                    <p className="muted-text">
+                      Pripravujem bezpecnu Stripe platbu...
+                    </p>
+                  </div>
+                ) : (
+                  <Elements options={elementsOptions} stripe={stripePromise}>
+                    <CreatorPaymentForm clientSecret={clientSecret} />
+                  </Elements>
+                )}
               </div>
-            ) : (
-              <Elements options={elementsOptions} stripe={stripePromise}>
-                <CreatorPaymentForm clientSecret={clientSecret} />
-              </Elements>
-            )}
-          </div>
-        </div>
-      ) : null}
+            </div>,
+            document.body
+          )
+        : null}
     </>
   );
 }
