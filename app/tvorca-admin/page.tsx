@@ -14,7 +14,7 @@ export default function CreatorAdminPage() {
               Zakladny moderny dashboard pre chat placeholder a spravu nastaveni.
             </p>
           </div>
-          <Link className="text-link" href="/tvorca/marek-novak">
+          <Link className="text-link" href="/marek-novak">
             Zobrazit verejny profil
           </Link>
         </div>

@@ -88,7 +88,7 @@ export function CreatorRegistrationForm() {
       setSuccessMessage("Profil tvorcu bol vytvoreny.");
 
       window.setTimeout(() => {
-        router.push(`/tvorca/${normalizedSlug}`);
+        router.push(`/${normalizedSlug}`);
       }, 500);
     } catch (error) {
       console.error(error);
