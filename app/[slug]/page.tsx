@@ -40,25 +40,33 @@ export default async function CreatorProfilePage({
 
   return (
     <main className="page">
-      <Container className="profile-layout">
-        <SectionCard className="public-profile-card">
-          <div className="stack-md centered">
+      <Container className="profile-layout creator-page-shell">
+        <SectionCard className="public-profile-card public-profile-hero">
+          <div className="stack-md centered public-profile-content">
             <AvatarPlaceholder label={initials || "TV"} size="lg" />
-            <div className="stack-xs centered">
+            <div className="stack-sm centered creator-identity-block">
               <p className="eyebrow">@{creator.slug}</p>
-              <h1>{creator.full_name}</h1>
-              <p className="lead compact">{creator.bio}</p>
+              <h1 className="creator-profile-title">{creator.full_name}</h1>
+              <p className="lead compact creator-profile-bio">{creator.bio}</p>
             </div>
             <div className="price-callout">
               Odpoved za {priceInEuros.toFixed(2)} EUR
             </div>
-            <button className="primary-button large-button" type="button">
-              Opytat sa otazku
-            </button>
+            <div className="creator-action-stack">
+              <button className="primary-button large-button creator-cta" type="button">
+                Opytat sa otazku
+              </button>
+              <Link
+                className="secondary-button creator-link-button"
+                href={`/tvorca-admin?slug=${creator.slug}`}
+              >
+                Otvorit creator admin
+              </Link>
+            </div>
           </div>
         </SectionCard>
 
-        <SectionCard className="stack-md">
+        <SectionCard className="stack-md creator-details-card">
           <div className="stack-xs">
             <p className="eyebrow">S cim ti mozem pomoct</p>
             <h2>Temy, ktore na profile odkomunikujes jasne a rychlo</h2>
@@ -68,9 +76,10 @@ export default async function CreatorProfilePage({
             <span className="chip">Strava a navyky</span>
             <span className="chip">Motivacia a rutina</span>
           </div>
-          <Link className="text-link" href={`/tvorca-admin?slug=${creator.slug}`}>
-            Otvorit creator admin
-          </Link>
+          <p className="muted-text">
+            Vyber si temu a pokracuj do dalsieho kroku bez zmeny aktualnej
+            funkcionality profilu.
+          </p>
         </SectionCard>
       </Container>
     </main>
