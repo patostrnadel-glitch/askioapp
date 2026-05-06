@@ -1,15 +1,35 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AvatarPlaceholder } from "./AvatarPlaceholder";
-import { FormField } from "./FormField";
 import { SectionCard } from "./SectionCard";
+import { getSupabaseClient } from "@/src/lib/supabase";
 
 type MainTab = "chat" | "settings";
 type SettingsTab = "price" | "personal";
 const PUBLIC_PROFILE_BASE_URL = "https://askioapp.vercel.app";
 
-export function CreatorAdminDashboard() {
+export type CreatorAdminRecord = {
+  id: string | number;
+  full_name: string;
+  email: string | null;
+  slug: string;
+  bio: string | null;
+  price_cents: number;
+};
+
+type CreatorAdminDashboardProps = {
+  initialCreator: CreatorAdminRecord | null;
+  initialErrorMessage?: string;
+  requestedSlug: string;
+};
+
+export function CreatorAdminDashboard({
+  initialCreator,
+  initialErrorMessage = "",
+  requestedSlug,
+}: CreatorAdminDashboardProps) {
   const [mainTab, setMainTab] = useState<MainTab>("chat");
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("price");
 
@@ -43,10 +63,17 @@ export function CreatorAdminDashboard() {
       </aside>
 
       <div className="dashboard-content">
-        {mainTab === "chat" ? <ChatPanel /> : <SettingsPanel
-          settingsTab={settingsTab}
-          setSettingsTab={setSettingsTab}
-        />}
+        {mainTab === "chat" ? (
+          <ChatPanel />
+        ) : (
+          <SettingsPanel
+            initialCreator={initialCreator}
+            initialErrorMessage={initialErrorMessage}
+            requestedSlug={requestedSlug}
+            settingsTab={settingsTab}
+            setSettingsTab={setSettingsTab}
+          />
+        )}
       </div>
     </div>
   );
@@ -77,11 +104,20 @@ function ChatPanel() {
 }
 
 type SettingsPanelProps = {
+  initialCreator: CreatorAdminRecord | null;
+  initialErrorMessage: string;
+  requestedSlug: string;
   settingsTab: SettingsTab;
   setSettingsTab: (tab: SettingsTab) => void;
 };
 
-function SettingsPanel({ settingsTab, setSettingsTab }: SettingsPanelProps) {
+function SettingsPanel({
+  initialCreator,
+  initialErrorMessage,
+  requestedSlug,
+  settingsTab,
+  setSettingsTab,
+}: SettingsPanelProps) {
   return (
     <div className="stack-lg">
       <SectionCard className="stack-md">
@@ -108,12 +144,28 @@ function SettingsPanel({ settingsTab, setSettingsTab }: SettingsPanelProps) {
         </div>
       </SectionCard>
 
-      {settingsTab === "price" ? <PriceSettings /> : <PersonalSettings />}
+      {settingsTab === "price" ? (
+        <PriceSettings initialPriceCents={initialCreator?.price_cents ?? 500} />
+      ) : (
+        <PersonalSettings
+          initialCreator={initialCreator}
+          initialErrorMessage={initialErrorMessage}
+          requestedSlug={requestedSlug}
+        />
+      )}
     </div>
   );
 }
 
-function PriceSettings() {
+type PriceSettingsProps = {
+  initialPriceCents: number;
+};
+
+function PriceSettings({ initialPriceCents }: PriceSettingsProps) {
+  const defaultPriceValue = Number.isFinite(initialPriceCents)
+    ? (initialPriceCents / 100).toFixed(2)
+    : "5.00";
+
   return (
     <SectionCard className="stack-md">
       <div className="stack-xs">
@@ -123,19 +175,38 @@ function PriceSettings() {
         </p>
       </div>
       <div className="price-input-row">
-        <input className="field-input price-input" defaultValue="5" type="number" />
+        <input
+          className="field-input price-input"
+          defaultValue={defaultPriceValue}
+          type="number"
+        />
         <span className="price-badge">EUR</span>
       </div>
     </SectionCard>
   );
 }
 
-function PersonalSettings() {
-  const [fullName, setFullName] = useState("Marek Novak");
-  const [email, setEmail] = useState("marek@novak.sk");
-  const [slug, setSlug] = useState("marek-novak");
-  const [bio, setBio] = useState("Pomaham ludom s fitness, treningom a stravou.");
-  const [feedbackMessage, setFeedbackMessage] = useState("");
+type PersonalSettingsProps = {
+  initialCreator: CreatorAdminRecord | null;
+  initialErrorMessage: string;
+  requestedSlug: string;
+};
+
+function PersonalSettings({
+  initialCreator,
+  initialErrorMessage,
+  requestedSlug,
+}: PersonalSettingsProps) {
+  const router = useRouter();
+  const [fullName, setFullName] = useState(initialCreator?.full_name ?? "Marek Novak");
+  const [email, setEmail] = useState(initialCreator?.email ?? "marek@novak.sk");
+  const [slug, setSlug] = useState(initialCreator?.slug ?? requestedSlug);
+  const [bio, setBio] = useState(
+    initialCreator?.bio ?? "Pomaham ludom s fitness, treningom a stravou."
+  );
+  const [isSaving, setIsSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(initialErrorMessage);
 
   const normalizedSlug =
     slug
@@ -143,6 +214,7 @@ function PersonalSettings() {
       .toLowerCase()
       .replace(/[^a-z0-9-]+/g, "-")
       .replace(/^-+|-+$/g, "") || "tvoj-slug";
+  const normalizedEmail = email.trim().toLowerCase();
   const profileUrl = `${PUBLIC_PROFILE_BASE_URL}/${normalizedSlug}`;
   const initials = fullName
     .split(" ")
@@ -150,19 +222,115 @@ function PersonalSettings() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const creatorId = initialCreator?.id ?? null;
 
-  const handleSave = (event: FormEvent<HTMLFormElement>) => {
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFeedbackMessage("Nastavenia su pripravene na ulozenie. Dalsi krok je napojenie na databazu.");
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    if (!creatorId) {
+      setErrorMessage(
+        `Profil pre slug "${requestedSlug}" sa nenasiel, preto nie je co ulozit.`
+      );
+      return;
+    }
+
+    if (!fullName.trim()) {
+      setErrorMessage("Meno a priezvisko je povinne.");
+      return;
+    }
+
+    if (!emailPattern.test(normalizedEmail)) {
+      setErrorMessage("Zadaj platny email.");
+      return;
+    }
+
+    if (!normalizedSlug) {
+      setErrorMessage("Pouzivatelske meno URL je povinne.");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const supabase = getSupabaseClient();
+      const { data: existingCreator, error: existingCreatorError } = await supabase
+        .from("creators")
+        .select("id")
+        .eq("slug", normalizedSlug)
+        .neq("id", creatorId)
+        .maybeSingle();
+
+      if (existingCreatorError) {
+        throw existingCreatorError;
+      }
+
+      if (existingCreator) {
+        setErrorMessage("Tento slug je uz obsadeny.");
+        return;
+      }
+
+      const { data: existingEmail, error: existingEmailError } = await supabase
+        .from("creators")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .neq("id", creatorId)
+        .maybeSingle();
+
+      if (existingEmailError) {
+        throw existingEmailError;
+      }
+
+      if (existingEmail) {
+        setErrorMessage("Tento email je uz obsadeny.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("creators")
+        .update({
+          full_name: fullName.trim(),
+          email: normalizedEmail,
+          slug: normalizedSlug,
+          bio: bio.trim(),
+        })
+        .eq("id", creatorId);
+
+      if (error) {
+        if (error.code === "23505") {
+          setErrorMessage("Tento slug alebo email je uz obsadeny.");
+          return;
+        }
+
+        if (error.code === "42501" || error.message.toLowerCase().includes("row-level security")) {
+          setErrorMessage("Supabase blokuje update. Treba doplnit UPDATE policy pre tabulku creators.");
+          return;
+        }
+
+        throw error;
+      }
+
+      setSuccessMessage("Nastavenia boli ulozene.");
+      router.replace(`/tvorca-admin?slug=${normalizedSlug}`);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Nepodarilo sa ulozit nastavenia profilu. Skus to znova.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCopyProfileUrl = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
-      setFeedbackMessage("Finalna URL profilu bola skopirovana.");
+      setSuccessMessage("Finalna URL profilu bola skopirovana.");
+      setErrorMessage("");
     } catch (error) {
       console.error(error);
-      setFeedbackMessage("Kopirovanie URL zlyhalo. Skus to este raz.");
+      setErrorMessage("Kopirovanie URL zlyhalo. Skus to este raz.");
     }
   };
 
@@ -186,8 +354,11 @@ function PersonalSettings() {
           </button>
         </div>
 
-        {feedbackMessage ? (
-          <p className="feedback-message feedback-success">{feedbackMessage}</p>
+        {successMessage ? (
+          <p className="feedback-message feedback-success">{successMessage}</p>
+        ) : null}
+        {errorMessage ? (
+          <p className="feedback-message feedback-error">{errorMessage}</p>
         ) : null}
 
         <div className="grid-two">
@@ -195,6 +366,7 @@ function PersonalSettings() {
             <span className="field-label">Meno a priezvisko</span>
             <input
               className="field-input"
+              disabled={isSaving}
               name="personalName"
               onChange={(event) => setFullName(event.target.value)}
               placeholder="Marek Novak"
@@ -206,6 +378,7 @@ function PersonalSettings() {
             <span className="field-label">Pouzivatelske meno (URL)</span>
             <input
               className="field-input"
+              disabled={isSaving}
               name="personalSlug"
               onChange={(event) => setSlug(event.target.value)}
               placeholder="marek-novak"
@@ -224,6 +397,7 @@ function PersonalSettings() {
             <input
               autoComplete="email"
               className="field-input"
+              disabled={isSaving}
               name="personalEmail"
               onChange={(event) => setEmail(event.target.value)}
               placeholder="marek@novak.sk"
@@ -247,6 +421,7 @@ function PersonalSettings() {
           <span className="field-label">Bio</span>
           <textarea
             className="field-input field-textarea"
+            disabled={isSaving}
             name="personalBio"
             onChange={(event) => setBio(event.target.value)}
             placeholder="Pomaham ludom s fitness, treningom a stravou."
@@ -272,8 +447,8 @@ function PersonalSettings() {
         </div>
 
         <div className="settings-actions">
-          <button className="primary-button" type="submit">
-            Ulozit
+          <button className="primary-button" disabled={isSaving} type="submit">
+            {isSaving ? "Ukladam..." : "Ulozit"}
           </button>
         </div>
       </form>

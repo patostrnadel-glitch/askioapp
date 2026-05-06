@@ -1,8 +1,33 @@
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { CreatorAdminDashboard } from "@/components/CreatorAdminDashboard";
+import { getSupabaseClient } from "@/src/lib/supabase";
 
-export default function CreatorAdminPage() {
+type CreatorAdminPageProps = {
+  searchParams: Promise<{
+    slug?: string;
+  }>;
+};
+
+export default async function CreatorAdminPage({
+  searchParams,
+}: CreatorAdminPageProps) {
+  const { slug } = await searchParams;
+  const requestedSlug = slug?.trim().toLowerCase() || "marek-novak";
+  const supabase = getSupabaseClient();
+  const { data: creator, error } = await supabase
+    .from("creators")
+    .select("id, full_name, email, slug, bio, price_cents")
+    .eq("slug", requestedSlug)
+    .maybeSingle();
+
+  const loadErrorMessage = error
+    ? "Nepodarilo sa nacitat profil tvorcu pre upravu."
+    : !creator
+      ? `Profil pre slug "${requestedSlug}" sa nenasiel.`
+      : "";
+  const publicProfileHref = creator ? `/${creator.slug}` : `/${requestedSlug}`;
+
   return (
     <main className="page">
       <Container className="stack-lg">
@@ -14,12 +39,17 @@ export default function CreatorAdminPage() {
               Zakladny moderny dashboard pre chat placeholder a spravu nastaveni.
             </p>
           </div>
-          <Link className="text-link" href="/marek-novak">
+          <Link className="text-link" href={publicProfileHref}>
             Zobrazit verejny profil
           </Link>
         </div>
 
-        <CreatorAdminDashboard />
+        <CreatorAdminDashboard
+          initialCreator={creator}
+          initialErrorMessage={loadErrorMessage}
+          key={creator?.slug ?? requestedSlug}
+          requestedSlug={requestedSlug}
+        />
       </Container>
     </main>
   );

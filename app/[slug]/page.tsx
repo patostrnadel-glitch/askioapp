@@ -68,7 +68,7 @@ export default async function CreatorProfilePage({
             <span className="chip">Strava a navyky</span>
             <span className="chip">Motivacia a rutina</span>
           </div>
-          <Link className="text-link" href="/tvorca-admin">
+          <Link className="text-link" href={`/tvorca-admin?slug=${creator.slug}`}>
             Otvorit creator admin
           </Link>
         </SectionCard>
