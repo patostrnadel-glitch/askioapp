@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AvatarPlaceholder } from "@/components/AvatarPlaceholder";
 import { Container } from "@/components/Container";
@@ -45,7 +44,6 @@ export default async function CreatorProfilePage({
           <div className="stack-md centered public-profile-content">
             <AvatarPlaceholder label={initials || "TV"} size="lg" />
             <div className="stack-sm centered creator-identity-block">
-              <p className="eyebrow">@{creator.slug}</p>
               <h1 className="creator-profile-title">{creator.full_name}</h1>
               <p className="lead compact creator-profile-bio">{creator.bio}</p>
             </div>
@@ -53,15 +51,13 @@ export default async function CreatorProfilePage({
               Odpoved za {priceInEuros.toFixed(2)} EUR
             </div>
             <div className="creator-action-stack">
-              <button className="primary-button large-button creator-cta" type="button">
-                Opytat sa otazku
+              <button className="primary-button creator-cta" type="button">
+                Opýtať sa otázku
               </button>
-              <Link
-                className="secondary-button creator-link-button"
-                href={`/tvorca-admin?slug=${creator.slug}`}
-              >
-                Otvorit creator admin
-              </Link>
+              <p className="creator-cta-note">
+                Po úspešnej platbe bude creator upozornený aby Vám odpísal čo
+                najskôr na vašu otázku
+              </p>
             </div>
           </div>
         </SectionCard>
