@@ -551,7 +551,8 @@ h4 {
   border-radius: 999px;
   background: var(--accent);
   color: var(--primary-strong);
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 400;
 }
 
 .creator-action-stack {
