@@ -152,7 +152,7 @@ export function CreatorPaymentSection() {
                 onClick={() => setIsOpen(false)}
                 type="button"
               >
-                Zavriet
+                X
               </button>
             </div>
 
