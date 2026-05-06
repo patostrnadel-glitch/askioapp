@@ -3,12 +3,12 @@ type FormFieldProps = {
   name: string;
   placeholder: string;
   multiline?: boolean;
-  type?: "text" | "number";
+  type?: "text" | "number" | "email";
   helperText?: string;
   defaultValue?: string;
   disabled?: boolean;
   autoComplete?: string;
-  inputMode?: "text" | "numeric" | "decimal";
+  inputMode?: "text" | "numeric" | "decimal" | "email";
   min?: number;
   step?: number | "any";
 };

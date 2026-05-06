@@ -20,14 +20,21 @@ export function CreatorRegistrationForm() {
 
     const formData = new FormData(event.currentTarget);
     const fullName = String(formData.get("fullName") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
     const bio = String(formData.get("bio") ?? "").trim();
     const slug = String(formData.get("slug") ?? "").trim();
     const priceValue = String(formData.get("price") ?? "").trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const slugPattern = /^[a-z0-9-]+$/;
     const priceInEuros = Number(priceValue);
 
     if (!fullName) {
       setErrorMessage("Meno a priezvisko je povinne.");
+      return;
+    }
+
+    if (!emailPattern.test(email)) {
+      setErrorMessage("Zadaj platny email.");
       return;
     }
 
@@ -47,6 +54,7 @@ export function CreatorRegistrationForm() {
 
     try {
       const supabase = getSupabaseClient();
+      const normalizedEmail = email.toLowerCase();
       const normalizedSlug = slug.toLowerCase();
       const priceCents = Math.round(priceInEuros * 100);
 
@@ -65,9 +73,25 @@ export function CreatorRegistrationForm() {
         return;
       }
 
+      const { data: existingEmail, error: existingEmailError } = await supabase
+        .from("creators")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+
+      if (existingEmailError) {
+        throw existingEmailError;
+      }
+
+      if (existingEmail) {
+        setErrorMessage("Tento email je uz obsadeny.");
+        return;
+      }
+
       const { error } = await supabase.from("creators").insert({
         user_id: null,
         full_name: fullName,
+        email: normalizedEmail,
         bio,
         slug: normalizedSlug,
         price_cents: priceCents,
@@ -78,7 +102,7 @@ export function CreatorRegistrationForm() {
 
       if (error) {
         if (error.code === "23505") {
-          setErrorMessage("Tento slug je uz obsadeny.");
+          setErrorMessage("Tento slug alebo email je uz obsadeny.");
           return;
         }
 
@@ -127,6 +151,17 @@ export function CreatorRegistrationForm() {
             placeholder="marek-novak"
           />
         </div>
+
+        <FormField
+          autoComplete="email"
+          disabled={isSubmitting}
+          inputMode="email"
+          label="Email"
+          name="email"
+          placeholder="marek@novak.sk"
+          type="email"
+          helperText="Na tento email ti vieme neskor posielat upozornenia a pristupy."
+        />
 
         <FormField
           disabled={isSubmitting}
