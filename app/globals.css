@@ -578,6 +578,43 @@ h4 {
   align-items: stretch;
 }
 
+.creator-payment-shell,
+.creator-payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.creator-payment-panel,
+.creator-payment-loading {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.creator-payment-loading {
+  text-align: center;
+}
+
+.creator-express-checkout {
+  width: 100%;
+}
+
+.creator-express-checkout-hidden {
+  display: none;
+}
+
+.creator-payment-availability {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .creator-cta,
 .creator-link-button {
   width: 100%;

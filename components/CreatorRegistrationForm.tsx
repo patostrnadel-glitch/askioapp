@@ -112,7 +112,7 @@ export function CreatorRegistrationForm() {
       setSuccessMessage("Profil tvorcu bol vytvoreny.");
 
       window.setTimeout(() => {
-        router.push(`/${normalizedSlug}`);
+        router.push(`/tvorca/${normalizedSlug}`);
       }, 500);
     } catch (error) {
       console.error(error);

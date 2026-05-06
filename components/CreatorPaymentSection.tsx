@@ -1,0 +1,236 @@
+"use client";
+
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Elements,
+  ExpressCheckoutElement,
+  PaymentElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePublishableKey =
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : null;
+
+type ExpressCheckoutAvailability = "checking" | "available" | "unavailable";
+
+export function CreatorPaymentSection() {
+  const [clientSecret, setClientSecret] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let isActive = true;
+
+    const createPaymentIntent = async () => {
+      if (!stripePublishableKey || !siteUrl) {
+        setErrorMessage("Stripe platba momentalne nie je dostupna.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/stripe/create-payment-intent", {
+          method: "POST",
+        });
+
+        const payload = (await response.json()) as {
+          clientSecret?: string;
+          error?: string;
+        };
+
+        if (!response.ok || !payload.clientSecret) {
+          throw new Error(
+            payload.error || "Nepodarilo sa pripravit Stripe platbu."
+          );
+        }
+
+        if (isActive) {
+          setClientSecret(payload.clientSecret);
+        }
+      } catch (error) {
+        console.error(error);
+
+        if (isActive) {
+          setErrorMessage("Nepodarilo sa pripravit Stripe platbu. Skus to znova.");
+        }
+      }
+    };
+
+    void createPaymentIntent();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const elementsOptions = useMemo(
+    () => ({
+      clientSecret,
+      appearance: {
+        theme: "stripe" as const,
+        variables: {
+          colorPrimary: "#6d28d9",
+          colorText: "#101828",
+          colorBackground: "#ffffff",
+          borderRadius: "16px",
+        },
+      },
+    }),
+    [clientSecret]
+  );
+
+  if (errorMessage) {
+    return <p className="feedback-message feedback-error">{errorMessage}</p>;
+  }
+
+  if (!clientSecret || !stripePromise) {
+    return (
+      <div className="creator-payment-loading">
+        <p className="muted-text">Pripravujem bezpecnu Stripe platbu...</p>
+      </div>
+    );
+  }
+
+  return (
+    <Elements options={elementsOptions} stripe={stripePromise}>
+      <CreatorPaymentForm clientSecret={clientSecret} />
+    </Elements>
+  );
+}
+
+type CreatorPaymentFormProps = {
+  clientSecret: string;
+};
+
+function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isCardSubmitting, setIsCardSubmitting] = useState(false);
+  const [isExpressSubmitting, setIsExpressSubmitting] = useState(false);
+  const [expressCheckoutAvailability, setExpressCheckoutAvailability] =
+    useState<ExpressCheckoutAvailability>("checking");
+
+  const confirmPayment = async () => {
+    if (!stripe || !elements) {
+      setErrorMessage("Platba este nie je pripravena.");
+      return;
+    }
+
+    setErrorMessage("");
+
+    const { error: submitError } = await elements.submit();
+
+    if (submitError) {
+      setErrorMessage(
+        submitError.message || "Skontroluj platobne udaje a skus to znova."
+      );
+      return;
+    }
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      clientSecret,
+      confirmParams: {
+        return_url: `${siteUrl}/platba-uspesna`,
+      },
+      redirect: "if_required",
+    });
+
+    if (error) {
+      setErrorMessage(error.message || "Platbu sa nepodarilo dokoncit.");
+      return;
+    }
+
+    if (paymentIntent?.status === "succeeded") {
+      router.push("/platba-uspesna");
+      return;
+    }
+
+    setErrorMessage("Platbu sa nepodarilo dokoncit.");
+  };
+
+  const handleCardSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsCardSubmitting(true);
+
+    try {
+      await confirmPayment();
+    } finally {
+      setIsCardSubmitting(false);
+    }
+  };
+
+  const handleExpressConfirm = async () => {
+    setIsExpressSubmitting(true);
+
+    try {
+      await confirmPayment();
+    } finally {
+      setIsExpressSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="creator-payment-shell">
+      <div className="creator-payment-panel">
+        <div
+          className={
+            expressCheckoutAvailability === "unavailable"
+              ? "creator-express-checkout creator-express-checkout-hidden"
+              : "creator-express-checkout"
+          }
+        >
+          <ExpressCheckoutElement
+            onConfirm={handleExpressConfirm}
+            onLoadError={() => setExpressCheckoutAvailability("unavailable")}
+            onReady={(event) => {
+              const availablePaymentMethods = event.availablePaymentMethods
+                ? Object.keys(event.availablePaymentMethods).length
+                : 0;
+
+              setExpressCheckoutAvailability(
+                availablePaymentMethods > 0 ? "available" : "unavailable"
+              );
+            }}
+            options={{
+              paymentMethodOrder: ["apple_pay", "google_pay"],
+            }}
+          />
+        </div>
+
+        {expressCheckoutAvailability === "unavailable" ? (
+          <p className="creator-payment-availability">
+            Apple Pay / Google Pay nie je na tomto zariadeni dostupne.
+          </p>
+        ) : null}
+      </div>
+
+      <form className="creator-payment-form" onSubmit={handleCardSubmit}>
+        <div className="creator-payment-panel">
+          <PaymentElement />
+        </div>
+
+        <button
+          className="primary-button creator-cta"
+          disabled={
+            !stripe || !elements || isCardSubmitting || isExpressSubmitting
+          }
+          type="submit"
+        >
+          {isCardSubmitting ? "Spracovavam platbu..." : "Zaplatit kartou"}
+        </button>
+      </form>
+
+      {errorMessage ? (
+        <p className="feedback-message feedback-error">{errorMessage}</p>
+      ) : null}
+    </div>
+  );
+}

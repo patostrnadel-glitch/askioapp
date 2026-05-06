@@ -26,7 +26,9 @@ export default async function CreatorAdminPage({
     : !creator
       ? `Profil pre slug "${requestedSlug}" sa nenasiel.`
       : "";
-  const publicProfileHref = creator ? `/${creator.slug}` : `/${requestedSlug}`;
+  const publicProfileHref = creator
+    ? `/tvorca/${creator.slug}`
+    : `/tvorca/${requestedSlug}`;
 
   return (
     <main className="page">
