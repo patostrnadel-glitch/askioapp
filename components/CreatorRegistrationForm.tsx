@@ -29,24 +29,24 @@ export function CreatorRegistrationForm() {
     const priceInEuros = Number(priceValue);
 
     if (!fullName) {
-      setErrorMessage("Meno a priezvisko je povinne.");
+      setErrorMessage("Meno a priezvisko je povinné.");
       return;
     }
 
     if (!emailPattern.test(email)) {
-      setErrorMessage("Zadaj platny email.");
+      setErrorMessage("Zadaj platný email.");
       return;
     }
 
     if (!slugPattern.test(slug)) {
       setErrorMessage(
-        "Slug moze obsahovat len male pismena, cisla a pomlcky bez medzier."
+        "Slug môže obsahovať len malé písmená, čísla a pomlčky bez medzier."
       );
       return;
     }
 
     if (!Number.isFinite(priceInEuros) || priceInEuros < 0) {
-      setErrorMessage("Cena spravy musi byt 0 alebo viac.");
+      setErrorMessage("Cena správy musí byť 0 alebo viac.");
       return;
     }
 
@@ -69,7 +69,7 @@ export function CreatorRegistrationForm() {
       }
 
       if (existingCreator) {
-        setErrorMessage("Tento slug je uz obsadeny.");
+        setErrorMessage("Tento slug je už obsadený.");
         return;
       }
 
@@ -84,7 +84,7 @@ export function CreatorRegistrationForm() {
       }
 
       if (existingEmail) {
-        setErrorMessage("Tento email je uz obsadeny.");
+        setErrorMessage("Tento email je už obsadený.");
         return;
       }
 
@@ -102,21 +102,21 @@ export function CreatorRegistrationForm() {
 
       if (error) {
         if (error.code === "23505") {
-          setErrorMessage("Tento slug alebo email je uz obsadeny.");
+          setErrorMessage("Tento slug alebo email je už obsadený.");
           return;
         }
 
         throw error;
       }
 
-      setSuccessMessage("Profil tvorcu bol vytvoreny.");
+      setSuccessMessage("Profil tvorcu bol vytvorený.");
 
       window.setTimeout(() => {
         router.push(`/tvorca/${normalizedSlug}`);
       }, 500);
     } catch (error) {
       console.error(error);
-      setErrorMessage("Nepodarilo sa vytvorit profil tvorcu. Skus to znova.");
+      setErrorMessage("Nepodarilo sa vytvoriť profil tvorcu. Skús to znova.");
     } finally {
       setIsSubmitting(false);
     }
@@ -140,12 +140,12 @@ export function CreatorRegistrationForm() {
             disabled={isSubmitting}
             label="Meno a priezvisko"
             name="fullName"
-            placeholder="Napriklad Marek Novak"
+            placeholder="Napríklad Marek Novák"
           />
           <FormField
             autoComplete="off"
             disabled={isSubmitting}
-            helperText="Pouzi len male pismena, cisla a pomlcky."
+            helperText="Použi len malé písmená, čísla a pomlčky."
             label="Slug URL"
             name="slug"
             placeholder="marek-novak"
@@ -160,14 +160,14 @@ export function CreatorRegistrationForm() {
           name="email"
           placeholder="marek@novak.sk"
           type="email"
-          helperText="Na tento email ti vieme neskor posielat upozornenia a pristupy."
+          helperText="Na tento email ti vieme neskôr posielať upozornenia a prístupy."
         />
 
         <FormField
           disabled={isSubmitting}
           label="Bio"
           name="bio"
-          placeholder="Kto si, s cim pomahas a preco sa ta oplati opytat."
+          placeholder="Kto si, s čím pomáhaš a prečo sa ťa oplatí opýtať."
           multiline
         />
 
@@ -175,23 +175,23 @@ export function CreatorRegistrationForm() {
           <FormField
             disabled={isSubmitting}
             inputMode="decimal"
-            label="Cena spravy"
+            label="Cena správy"
             min={0}
             name="price"
             placeholder="5"
             step={0.01}
             type="number"
-            helperText="Zadaj sumu v eurach, napr. 5."
+            helperText="Zadaj sumu v eurách, napr. 5."
           />
 
           <label className="field">
-            <span className="field-label">Profilova fotka</span>
+            <span className="field-label">Profilová fotka</span>
             <div className="upload-card">
               <AvatarPlaceholder label="Foto" />
               <div className="stack-xs">
                 <strong>Nahraj fotku</strong>
                 <span className="helper-text">
-                  Zatial len vizualny placeholder bez realneho uploadu.
+                  Zatiaľ len vizuálny placeholder bez reálneho uploadu.
                 </span>
               </div>
               <button
@@ -199,14 +199,14 @@ export function CreatorRegistrationForm() {
                 disabled={isSubmitting}
                 type="button"
               >
-                Vybrat subor
+                Vybrať súbor
               </button>
             </div>
           </label>
         </div>
 
         <button className="primary-button" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Ukladam..." : "Pokracovat"}
+          {isSubmitting ? "Ukladám..." : "Pokračovať"}
         </button>
       </form>
     </SectionCard>

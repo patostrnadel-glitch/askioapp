@@ -8,15 +8,15 @@ export default function RegistrationPage() {
       <Container className="stack-lg">
         <div className="page-header">
           <div className="stack-sm">
-            <p className="eyebrow">Registracia tvorcu</p>
+            <p className="eyebrow">Registrácia tvorcu</p>
             <h1>Vytvor si profil tvorcu</h1>
             <p className="lead">
-              Vypln zakladne udaje, nastav cenu spravy a priprav si moderny
+              Vyplň základné údaje, nastav cenu správy a priprav si moderný
               profil pre svoje publikum.
             </p>
           </div>
           <Link className="text-link" href="/">
-            Spat na uvod
+            Späť na úvod
           </Link>
         </div>
 

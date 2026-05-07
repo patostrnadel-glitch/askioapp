@@ -11,22 +11,22 @@ export default function HomePage() {
             <p className="eyebrow">Creator economy MVP</p>
             <h1>Askly</h1>
             <p className="hero-text">
-              Rychle odpovede od tvorcov, ktorym doverujes.
+              Rýchle odpovede od tvorcov, ktorým dôveruješ.
             </p>
             <div className="hero-actions">
               <Link className="primary-button" href="/registracia">
-                Registrovat sa ako tvorca
+                Registrovať sa ako tvorca
               </Link>
             </div>
           </div>
 
           <SectionCard className="hero-card">
             <div className="stack-sm">
-              <span className="status-pill">Nova generacia platenych otazok</span>
-              <h2>Jednoduche profily, jasna cena, rychly kontakt.</h2>
+              <span className="status-pill">Nová generácia platených otázok</span>
+              <h2>Jednoduché profily, jasná cena, rýchly kontakt.</h2>
               <p className="muted-text">
-                Cisty landing placeholder pre MVP, na ktorom sa da dalej
-                stavat onboarding, platby aj chat.
+                Čistý landing placeholder pre MVP, na ktorom sa dá ďalej
+                stavať onboarding, platby aj chat.
               </p>
             </div>
           </SectionCard>

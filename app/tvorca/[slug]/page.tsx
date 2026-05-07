@@ -23,7 +23,7 @@ export default async function CreatorProfilePage({
     .maybeSingle();
 
   if (error) {
-    throw new Error("Nepodarilo sa nacitat profil tvorcu.");
+    throw new Error("Nepodarilo sa načítať profil tvorcu.");
   }
 
   if (!creator) {
@@ -54,8 +54,8 @@ export default async function CreatorProfilePage({
             <div className="creator-action-stack">
               <CreatorPaymentSection />
               <p className="creator-cta-note">
-                Po uspesnej platbe bude creator upozorneny aby Vam odpisal co
-                najskor na vasu otazku
+                Po úspešnej platbe bude creator upozornený aby Vám odpísal čo
+                najskôr na vašu otázku
               </p>
             </div>
           </div>

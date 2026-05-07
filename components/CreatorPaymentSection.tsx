@@ -73,7 +73,7 @@ export function CreatorPaymentSection() {
 
         if (!response.ok || !payload.clientSecret) {
           throw new Error(
-            payload.error || "Nepodarilo sa pripravit Stripe platbu."
+            payload.error || "Nepodarilo sa pripraviť Stripe platbu."
           );
         }
 
@@ -84,7 +84,7 @@ export function CreatorPaymentSection() {
         console.error(error);
 
         if (isActive) {
-          setErrorMessage("Nepodarilo sa pripravit Stripe platbu. Skus to znova.");
+          setErrorMessage("Nepodarilo sa pripraviť Stripe platbu. Skús to znova.");
         }
       } finally {
         if (isActive) {
@@ -123,7 +123,7 @@ export function CreatorPaymentSection() {
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        Opytat sa otazku
+        Opýtať sa otázku
       </button>
 
       {isMounted && isOpen
@@ -148,18 +148,18 @@ export function CreatorPaymentSection() {
                       className="creator-payment-title"
                       id="creator-payment-title"
                     >
-                      Opytat sa otazku
+                      Opýtať sa otázku
                     </h2>
                     <div className="price-callout creator-payment-chip">
-                      💬 Rychla odpoved • 4,90 €
+                      💬 Rýchla odpoveď • 4,90 €
                     </div>
                     <p className="creator-payment-copy">
-                      Po platbe sa otvori moznost poslat otazku.
+                      Po platbe sa otvorí možnosť poslať otázku.
                     </p>
                   </div>
 
                   <button
-                    aria-label="Zavriet modal"
+                    aria-label="Zavrieť modál"
                     className="creator-payment-close"
                     onClick={() => setIsOpen(false)}
                     type="button"
@@ -177,7 +177,7 @@ export function CreatorPaymentSection() {
                 {!stripePromise || isLoadingClientSecret || !clientSecret ? (
                   <div className="creator-payment-loading">
                     <p className="muted-text">
-                      Pripravujem bezpecnu Stripe platbu...
+                      Pripravujem bezpečnú Stripe platbu...
                     </p>
                   </div>
                 ) : (
@@ -245,7 +245,7 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
 
     if (submitError) {
       setErrorMessage(
-        submitError.message || "Skontroluj platobne udaje a skus to znova."
+        submitError.message || "Skontroluj platobné údaje a skús to znova."
       );
       return;
     }
@@ -260,7 +260,7 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
     });
 
     if (error) {
-      setErrorMessage(error.message || "Platbu sa nepodarilo dokoncit.");
+      setErrorMessage(error.message || "Platbu sa nepodarilo dokončiť.");
       return;
     }
 
@@ -269,7 +269,7 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
       return;
     }
 
-    setErrorMessage("Platbu sa nepodarilo dokoncit.");
+    setErrorMessage("Platbu sa nepodarilo dokončiť.");
   };
 
   const handleCardSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -324,7 +324,7 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
 
           {expressCheckoutAvailability === "unavailable" ? (
             <p className="creator-payment-availability">
-              Apple Pay / Google Pay nie je na tomto zariadeni dostupne.
+              Apple Pay / Google Pay nie je na tomto zariadení dostupné.
             </p>
           ) : null}
         </div>
@@ -344,7 +344,7 @@ function CreatorPaymentForm({ clientSecret }: CreatorPaymentFormProps) {
             }
             type="submit"
           >
-            {isCardSubmitting ? "Spracovavam platbu..." : "Zaplatit kartou"}
+            {isCardSubmitting ? "Spracovávam platbu..." : "Zaplatiť kartou"}
           </button>
         </form>
       ) : null}

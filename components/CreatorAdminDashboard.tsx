@@ -41,11 +41,11 @@ export function CreatorAdminDashboard({
           <p className="eyebrow">Tvorca admin</p>
           <h2 className="sidebar-title">Askly Studio</h2>
           <p className="muted-text">
-            Jednoduche miesto pre spravu otazok a verejneho profilu.
+            Jednoduché miesto pre správu otázok a verejného profilu.
           </p>
         </div>
 
-        <nav className="tab-group" aria-label="Hlavna navigacia">
+        <nav className="tab-group" aria-label="Hlavná navigácia">
           <button
             className={mainTab === "chat" ? "tab active" : "tab"}
             onClick={() => setMainTab("chat")}
@@ -85,18 +85,18 @@ function ChatPanel() {
     <SectionCard className="stack-lg">
       <div className="stack-xs">
         <p className="eyebrow">Chat</p>
-        <h3>Zatial nemas ziadne otazky.</h3>
+        <h3>Zatiaľ nemáš žiadne otázky.</h3>
         <p className="muted-text">
-          Ked niekto posle svoju prvu platenu otazku, zobrazi sa prave tu.
+          Keď niekto pošle svoju prvú platenú otázku, zobrazí sa práve tu.
         </p>
       </div>
 
       <div className="empty-state">
         <div className="empty-icon">?</div>
         <div className="stack-xs">
-          <strong>Inbox je prazdny</strong>
+          <strong>Inbox je prázdny</strong>
           <p className="muted-text">
-            Toto je placeholder karta pre buduci chat a odpovede.
+            Toto je placeholder karta pre budúci chat a odpovede.
           </p>
         </div>
       </div>
@@ -124,23 +124,23 @@ function SettingsPanel({
       <SectionCard className="stack-md">
         <div className="stack-xs">
           <p className="eyebrow">Nastavenia</p>
-          <h3>Sprav svoj profil tvorcu</h3>
+          <h3>Spravuj svoj profil tvorcu</h3>
         </div>
 
-        <div className="subtab-group" aria-label="Podzalozky nastaveni">
+        <div className="subtab-group" aria-label="Podzáložky nastavení">
           <button
             className={settingsTab === "price" ? "subtab active" : "subtab"}
             onClick={() => setSettingsTab("price")}
             type="button"
           >
-            Cena spravy
+            Cena správy
           </button>
           <button
             className={settingsTab === "personal" ? "subtab active" : "subtab"}
             onClick={() => setSettingsTab("personal")}
             type="button"
           >
-            Osobne udaje
+            Osobné údaje
           </button>
         </div>
       </SectionCard>
@@ -170,9 +170,9 @@ function PriceSettings({ initialPriceCents }: PriceSettingsProps) {
   return (
     <SectionCard className="stack-md">
       <div className="stack-xs">
-        <h4>Cena spravy</h4>
+        <h4>Cena správy</h4>
         <p className="muted-text">
-          Tato cena sa zobrazi navstevnikom na tvojom profile.
+          Táto cena sa zobrazí návštevníkom na tvojom profile.
         </p>
       </div>
       <div className="price-input-row">
@@ -239,23 +239,23 @@ function PersonalSettings({
 
     if (!creatorId) {
       setErrorMessage(
-        `Profil pre slug "${requestedSlug}" sa nenasiel, preto nie je co ulozit.`
+        `Profil pre slug "${requestedSlug}" sa nenašiel, preto nie je čo uložiť.`
       );
       return;
     }
 
     if (!fullName.trim()) {
-      setErrorMessage("Meno a priezvisko je povinne.");
+      setErrorMessage("Meno a priezvisko je povinné.");
       return;
     }
 
     if (!emailPattern.test(normalizedEmail)) {
-      setErrorMessage("Zadaj platny email.");
+      setErrorMessage("Zadaj platný email.");
       return;
     }
 
     if (!normalizedSlug) {
-      setErrorMessage("Pouzivatelske meno URL je povinne.");
+      setErrorMessage("Používateľské meno URL je povinné.");
       return;
     }
 
@@ -275,7 +275,7 @@ function PersonalSettings({
       }
 
       if (existingCreator) {
-        setErrorMessage("Tento slug je uz obsadeny.");
+        setErrorMessage("Tento slug je už obsadený.");
         return;
       }
 
@@ -291,7 +291,7 @@ function PersonalSettings({
       }
 
       if (existingEmail) {
-        setErrorMessage("Tento email je uz obsadeny.");
+        setErrorMessage("Tento email je už obsadený.");
         return;
       }
 
@@ -307,24 +307,24 @@ function PersonalSettings({
 
       if (error) {
         if (error.code === "23505") {
-          setErrorMessage("Tento slug alebo email je uz obsadeny.");
+          setErrorMessage("Tento slug alebo email je už obsadený.");
           return;
         }
 
         if (error.code === "42501" || error.message.toLowerCase().includes("row-level security")) {
-          setErrorMessage("Supabase blokuje update. Treba doplnit UPDATE policy pre tabulku creators.");
+          setErrorMessage("Supabase blokuje update. Treba doplniť UPDATE policy pre tabuľku creators.");
           return;
         }
 
         throw error;
       }
 
-      setSuccessMessage("Nastavenia boli ulozene.");
+      setSuccessMessage("Nastavenia boli uložené.");
       router.replace(`/tvorca-admin?slug=${normalizedSlug}`);
       router.refresh();
     } catch (error) {
       console.error(error);
-      setErrorMessage("Nepodarilo sa ulozit nastavenia profilu. Skus to znova.");
+      setErrorMessage("Nepodarilo sa uložiť nastavenia profilu. Skús to znova.");
     } finally {
       setIsSaving(false);
     }
@@ -333,11 +333,11 @@ function PersonalSettings({
   const handleCopyProfileUrl = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
-      setSuccessMessage("Finalna URL profilu bola skopirovana.");
+      setSuccessMessage("Finálna URL profilu bola skopírovaná.");
       setErrorMessage("");
     } catch (error) {
       console.error(error);
-      setErrorMessage("Kopirovanie URL zlyhalo. Skus to este raz.");
+      setErrorMessage("Kopírovanie URL zlyhalo. Skús to ešte raz.");
     }
   };
 
@@ -357,17 +357,17 @@ function PersonalSettings({
     setErrorMessage("");
 
     if (!creatorId) {
-      setErrorMessage("Profil sa najprv musi vytvorit, az potom vies nahrat fotku.");
+      setErrorMessage("Profil sa najprv musí vytvoriť, až potom vieš nahrať fotku.");
       return;
     }
 
     if (!selectedFile.type.startsWith("image/")) {
-      setErrorMessage("Nahraj prosim obrazok vo formate JPG, PNG, WEBP alebo GIF.");
+      setErrorMessage("Nahraj prosím obrázok vo formáte JPG, PNG, WEBP alebo GIF.");
       return;
     }
 
     if (selectedFile.size > MAX_AVATAR_SIZE_BYTES) {
-      setErrorMessage("Profilova fotka moze mat maximalne 5 MB.");
+      setErrorMessage("Profilová fotka môže mať maximálne 5 MB.");
       return;
     }
 
@@ -391,7 +391,7 @@ function PersonalSettings({
 
         if (uploadMessage.includes("bucket") || uploadMessage.includes("not found")) {
           setErrorMessage(
-            `V Supabase chyba storage bucket "${AVATAR_BUCKET}". Najprv ho treba vytvorit.`
+            `V Supabase chýba storage bucket "${AVATAR_BUCKET}". Najprv ho treba vytvoriť.`
           );
           return;
         }
@@ -401,7 +401,7 @@ function PersonalSettings({
           uploadError.message.toLowerCase().includes("permission")
         ) {
           setErrorMessage(
-            "Supabase blokuje upload fotky. Treba doplnit storage policies pre avatar bucket."
+            "Supabase blokuje upload fotky. Treba doplniť storage policies pre avatar bucket."
           );
           return;
         }
@@ -424,7 +424,7 @@ function PersonalSettings({
           updateError.message.toLowerCase().includes("row-level security")
         ) {
           setErrorMessage(
-            "Fotka sa nahrala, ale databaza blokuje ulozenie avatar_url. Treba doplnit UPDATE policy pre creators."
+            "Fotka sa nahrala, ale databáza blokuje uloženie avatar_url. Treba doplniť UPDATE policy pre creators."
           );
           return;
         }
@@ -433,11 +433,11 @@ function PersonalSettings({
       }
 
       setAvatarUrl(publicUrl);
-      setSuccessMessage("Profilova fotka bola uspesne nahrata.");
+      setSuccessMessage("Profilová fotka bola úspešne nahratá.");
       router.refresh();
     } catch (error) {
       console.error(error);
-      setErrorMessage("Nepodarilo sa nahrat profilovu fotku. Skus to znova.");
+      setErrorMessage("Nepodarilo sa nahrať profilovú fotku. Skús to znova.");
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -451,7 +451,7 @@ function PersonalSettings({
             <p className="eyebrow">Link tvojho profilu</p>
             <strong className="profile-url-preview">{profileUrl}</strong>
             <p className="muted-text">
-              Takto bude vyzerat finalna verejna URL tvojho profilu.
+              Takto bude vyzerať finálna verejná URL tvojho profilu.
             </p>
           </div>
           <button
@@ -459,7 +459,7 @@ function PersonalSettings({
             onClick={handleCopyProfileUrl}
             type="button"
           >
-            Kopirovat
+            Kopírovať
           </button>
         </div>
 
@@ -478,13 +478,13 @@ function PersonalSettings({
               disabled={isSaving}
               name="personalName"
               onChange={(event) => setFullName(event.target.value)}
-              placeholder="Marek Novak"
+              placeholder="Marek Novák"
               type="text"
               value={fullName}
             />
           </label>
           <label className="field">
-            <span className="field-label">Pouzivatelske meno (URL)</span>
+            <span className="field-label">Používateľské meno (URL)</span>
             <input
               className="field-input"
               disabled={isSaving}
@@ -495,7 +495,7 @@ function PersonalSettings({
               value={slug}
             />
             <span className="helper-text">
-              Finalna URL: {PUBLIC_PROFILE_BASE_URL}/{normalizedSlug}
+              Finálna URL: {PUBLIC_PROFILE_BASE_URL}/{normalizedSlug}
             </span>
           </label>
         </div>
@@ -514,14 +514,14 @@ function PersonalSettings({
               value={email}
             />
             <span className="helper-text">
-              Tento email vies zobrazit len v administracii alebo pouzit na notifikacie.
+              Tento email vieš zobraziť len v administrácii alebo použiť na notifikácie.
             </span>
           </label>
           <div className="field">
             <span className="field-label">Stav profilu</span>
-            <div className="status-pill settings-status-pill">Pripraveny na publikovanie</div>
+            <div className="status-pill settings-status-pill">Pripravený na publikovanie</div>
             <span className="helper-text">
-              Po ulozeni budes mat profil dostupny na verejnej URL.
+              Po uložení budeš mať profil dostupný na verejnej URL.
             </span>
           </div>
         </div>
@@ -533,21 +533,21 @@ function PersonalSettings({
             disabled={isSaving}
             name="personalBio"
             onChange={(event) => setBio(event.target.value)}
-            placeholder="Pomaham ludom s fitness, treningom a stravou."
+            placeholder="Pomáham ľuďom s fitness, tréningom a stravou."
             rows={5}
             value={bio}
           />
           <span className="helper-text">
-            Strucne vysvetli, s cim ludom pomahas a preco sa ta oplati opytat.
+            Stručne vysvetli, s čím ľuďom pomáhaš a prečo sa ťa oplatí opýtať.
           </span>
         </label>
 
         <div className="profile-photo-row">
           <AvatarPlaceholder imageUrl={avatarUrl} label={initials || "MN"} />
           <div className="stack-xs">
-            <strong>Profilova fotka</strong>
+            <strong>Profilová fotka</strong>
             <p className="muted-text">
-              Nahraj JPG, PNG, WEBP alebo GIF do velkosti 5 MB.
+              Nahraj JPG, PNG, WEBP alebo GIF do veľkosti 5 MB.
             </p>
           </div>
           <input
@@ -564,13 +564,13 @@ function PersonalSettings({
             onClick={handleAvatarButtonClick}
             type="button"
           >
-            {isUploadingAvatar ? "Nahravam..." : "Zmenit fotku"}
+            {isUploadingAvatar ? "Nahrávam..." : "Zmeniť fotku"}
           </button>
         </div>
 
         <div className="settings-actions">
           <button className="primary-button" disabled={isSaving} type="submit">
-            {isSaving ? "Ukladam..." : "Ulozit"}
+            {isSaving ? "Ukladám..." : "Uložiť"}
           </button>
         </div>
       </form>
