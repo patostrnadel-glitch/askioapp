@@ -51,7 +51,6 @@ export default async function CreatorProfilePage({
               <h1 className="creator-profile-title">{creator.full_name}</h1>
               <p className="lead compact creator-profile-bio">{creator.bio}</p>
             </div>
-            <div className="price-callout">💬 Rychla odpoved • 4,90 €</div>
             <div className="creator-action-stack">
               <CreatorPaymentSection />
               <p className="creator-cta-note">

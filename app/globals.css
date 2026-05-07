@@ -561,13 +561,20 @@ h4 {
 
 .price-callout {
   width: fit-content;
-  min-height: 40px;
-  padding: 10px 16px;
+  min-height: 44px;
+  padding: 10px 20px;
   border-radius: 999px;
   background: var(--accent);
   color: var(--primary-strong);
-  font-size: 0.7rem;
-  font-weight: 400;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+button.price-callout:hover {
+  background: #e0e7ff;
+  transform: translateY(-1px);
 }
 
 .creator-action-stack {
@@ -635,7 +642,6 @@ h4 {
 }
 
 .creator-payment-title,
-.creator-payment-price,
 .creator-payment-copy {
   margin: 0;
 }
@@ -645,14 +651,13 @@ h4 {
   line-height: 1.2;
 }
 
-.creator-payment-price {
-  color: var(--primary-strong);
-  font-weight: 700;
-}
-
 .creator-payment-copy {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.creator-payment-chip {
+  align-self: flex-start;
 }
 
 .creator-payment-close {

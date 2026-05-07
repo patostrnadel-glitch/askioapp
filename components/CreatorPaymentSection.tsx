@@ -119,11 +119,12 @@ export function CreatorPaymentSection() {
   return (
     <>
       <button
-        className="primary-button creator-cta"
+        className="price-callout"
         onClick={() => setIsOpen(true)}
         type="button"
+        style={{ alignSelf: "center" }}
       >
-        Opytat sa otazku
+        💬 Rychla odpoved • 4,90 €
       </button>
 
       {isMounted && isOpen
@@ -150,9 +151,9 @@ export function CreatorPaymentSection() {
                     >
                       Opytat sa otazku
                     </h2>
-                    <p className="creator-payment-price">
-                      Rychla odpoved • 4,90 €
-                    </p>
+                    <div className="price-callout creator-payment-chip">
+                      💬 Rychla odpoved • 4,90 €
+                    </div>
                     <p className="creator-payment-copy">
                       Po platbe sa otvori moznost poslat otazku.
                     </p>
