@@ -746,6 +746,13 @@ button.price-callout:hover {
   font-weight: 700;
 }
 
+/* Hide Stripe Test Mode Badge and Developer tools */
+#stripe-test-mode-badge,
+.stripe-test-mode-badge,
+[data-testid="test-mode-badge"] {
+  display: none !important;
+}
+
 @media (min-width: 768px) {
   .creator-payment-modal-backdrop {
     align-items: center;
