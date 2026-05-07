@@ -749,8 +749,16 @@ button.price-callout:hover {
 /* Hide Stripe Test Mode Badge and Developer tools */
 #stripe-test-mode-badge,
 .stripe-test-mode-badge,
-[data-testid="test-mode-badge"] {
+[data-testid="test-mode-badge"],
+[aria-label="Open Stripe Developer Tools"],
+[class*="FloatingActionButton"],
+[class*="StripeDeveloperTools"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
 }
 
 @media (min-width: 768px) {
