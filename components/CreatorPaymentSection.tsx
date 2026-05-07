@@ -154,7 +154,7 @@ export function CreatorPaymentSection() {
                       💬 Rýchla odpoveď • 4,90 €
                     </div>
                     <p className="creator-payment-copy">
-                      Po úspešnej platbe, sa Vám otvorí chat s creatorom aby ste mu mohli poslať vašu otázku
+                      Po Platbe budete môcť poslať creatorovi svoju otázku.
                     </p>
                   </div>
 
